@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>NOVA2</title>
+</head>
+<body>
+<p id="status">Loading…</p>
+<script>
+(function () {
+  var GATE_URL = 'https://script.google.com/macros/s/AKfycbwA4tNHGnslhD_UsTRlxtQ72Y-0MFlENcyZcIFUhQ2VnraNB5yj9XdmjOzqRBQ2E_eZ/exec';
+  var INVALID = 'This link is not valid. Please contact MK Lab.';
+  var UNAVAILABLE = 'Temporarily unavailable. Please try again later.';
+  function show(text) { document.getElementById('status').textContent = text; }
+
+  var token = new URLSearchParams(location.hash.slice(1)).get('k') ||
+              new URLSearchParams(location.search).get('k') || '';
+  if (!/^[0-9a-f]{64}$/.test(token)) { show(INVALID); return; }
+
+  fetch(GATE_URL, {
+    method: 'POST',
+    credentials: 'omit',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ version: 2, token: token })
+  })
+    .then(function (res) { if (!res.ok) throw new Error('HTTP'); return res.json(); })
+    .then(function (r) {
+      if (r.status === 'ok' && typeof r.html === 'string') {
+        document.open(); document.write(r.html); document.close();
+      } else {
+        show(r.status === 'denied' ? INVALID : UNAVAILABLE);
+      }
+    })
+    .catch(function () { show(UNAVAILABLE); });
+})();
+</script>
+</body>
+</html>
